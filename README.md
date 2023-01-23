@@ -1,4 +1,4 @@
-# dlings
+# Dlings
 Welcome to `dlings`. This project aims to teach you how to program in D.
 If the name doesn't sound strange, it's because you might have heard of `rustlings` or `ziglings`. In fact, this is **heavily** based on [rustlings](https://github.com/rust-lang/rustlings). If you're familiar with how `rustlings` work, you will have no trouble getting started with `dlings`.
 
