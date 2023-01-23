@@ -16,7 +16,7 @@ void main()
     writeln(r"                       |___/       ");
     writeln();
     writeln("This exercise compiles successfully. The remaining exercises contain a compiler");
-    writeln("or logic error. The central concept behind Rustlings is to fix these errors and");
+    writeln("or logic error. The central concept behind Dlings is to fix these errors and");
     writeln("solve the exercises. Good luck!");
     writeln();
     writeln("The source for this exercise is in `exercises/intro/intro1.d`. Have a look!");
