@@ -1,0 +1,15 @@
+{
+	"authors": [
+		"Joao Lourenco"
+	],
+	"copyright": "Copyright © 2023, Joao Lourenco",
+	"dependencies": {
+		"argparse": { "version": "~>1.2.0", "dflags": [] },
+		"fswatch": { "version": "~>0.6.0", "dflags": [] }
+	},
+	"description": "Small exercises to get you used to reading and writing D code!",
+	"dflags": [],
+	"license": "BSL-1.0",
+	"name": "dlings",
+	"targetName": "dlings"
+}

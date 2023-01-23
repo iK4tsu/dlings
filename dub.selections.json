@@ -1,0 +1,7 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"argparse": "1.2.0",
+		"fswatch": "0.6.0"
+	}
+}
