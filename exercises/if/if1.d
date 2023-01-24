@@ -6,7 +6,6 @@ int max(int a, int b)
     // Do not use:
     // - another function call
     // - additional variables
-	return a > b ? a : b;
 }
 
 unittest
