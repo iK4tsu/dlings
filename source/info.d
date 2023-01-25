@@ -55,6 +55,15 @@ immutable Exercise[] exercices =
         type: test,
     },
 
+    {
+        name: "variables3",
+        path: buildPath("exercises", "variables", "variables3.d"),
+        hint: "
+            Variable 'a' is a constant value, so it cannot be modified. Remove
+            the assignment expression line.".outdent.strip(),
+        type: compile,
+    },
+
 // if:
     {
         name: "if1",
