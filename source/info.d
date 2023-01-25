@@ -44,6 +44,17 @@ immutable Exercise[] exercices =
         type: compile,
     },
 
+    {
+        name: "variables2",
+        path: buildPath("exercises", "variables", "variables2.d"),
+        hint: "
+            Unlike C or C++, all variables in D have predictable values when
+            initialized. This is because, by default, all variables are
+            initialized to their default initializer value. The int.init value
+            is '0'.".outdent.strip(),
+        type: test,
+    },
+
 // if:
     {
         name: "if1",
