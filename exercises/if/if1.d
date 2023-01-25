@@ -1,6 +1,6 @@
 // Just D it
 
-int max(int a, int b)
+int max(const int a, const int b)
 {
     // Complete this function to return the bigger number!
     // Do not use:
