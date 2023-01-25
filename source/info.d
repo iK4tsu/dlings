@@ -1,6 +1,7 @@
 module info;
 
 import std.path : buildPath;
+import std.string : outdent, strip;
 
 struct Exercise
 {
@@ -29,6 +30,17 @@ immutable Exercise[] exercices =
         name: "intro2",
         path: buildPath("exercises", "intro", "intro2.d"),
         hint: "No hint yet",
+        type: compile,
+    },
+
+// variables:
+    {
+        name: "variables1",
+        path: buildPath("exercises", "variables", "variables1.d"),
+        hint: "
+            When declaring variables, D needs a bit more information than just
+            an identifier. Try giving 'a' aditional information about what it is
+            and what it represents. Add the type before 'a'.".outdent.strip(),
         type: compile,
     },
 
