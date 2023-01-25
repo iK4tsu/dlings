@@ -1,3 +1,15 @@
+/// Sometimes just solving an exercise isn't enough.
+/// We encourage you to stay and mess around with the exercises, until you feel
+/// confortable to move forward.
+/// When you feel you're done with an exercise, remove the 'Just D it' comment
+/// below.
+
+/// You can get a hint by either running `dlings hint intro1` or by typing `hint`
+/// in watch mode.
+/// If you're in watch mode the exercise will be recompiled each time you modify
+/// the file. Try messing around with it a bit, delete or add some `writeln`,
+/// save the file and see what happens!
+
 import std.stdio : writeln;
 
 // Just D it
