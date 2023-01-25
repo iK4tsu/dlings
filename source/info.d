@@ -29,7 +29,9 @@ immutable Exercise[] exercices =
     {
         name: "intro2",
         path: buildPath("exercises", "intro", "intro2.d"),
-        hint: "No hint yet",
+        hint: "
+            The format string expects something.
+            Add an argument inside the function.".outdent.strip(),
         type: compile,
     },
 
