@@ -66,6 +66,42 @@ immutable Exercise[] exercices =
         type: compile,
     },
 
+// floating_point
+    {
+        name: "floating_point1",
+        path: buildPath("exercises", "floating_point", "floating_point1.d"),
+        hint: "
+            Integer expressions cannot preserve the fractional part of a
+            result. Change the expected value '0.5' to '0'.".outdent.strip(),
+        type: test,
+    },
+
+    {
+        name: "floating_point2",
+        path: buildPath("exercises", "floating_point", "floating_point2.d"),
+        hint: "
+            The default initializer of floating point types is 'nan'. Arithmetic
+            operations with 'nan' always result in 'nan'. Initialize 'f' to any
+            numeric literal, e.g `float f = 0;`".outdent.strip(),
+        type: test,
+    },
+
+    {
+        name: "floating_point3",
+        path: buildPath("exercises", "floating_point", "floating_point3.d"),
+        hint: "
+            Make use of the 'std.math' module. There you can find the 'isNan'
+            function and change the code to `assert(isNan(f));`".outdent.strip(),
+        type: compile,
+    },
+
+    {
+        name: "floating_point4",
+        path: buildPath("exercises", "floating_point", "floating_point4.d"),
+        hint: "No hints this time ;)",
+        type: compile,
+    },
+
 // if:
     {
         name: "if1",
