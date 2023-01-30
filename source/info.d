@@ -169,4 +169,18 @@ immutable Exercise[] exercices =
             evaluated!".outdent.strip(),
         type: test,
     },
+
+    {
+        name: "if2",
+        path: buildPath("exercises", "if", "if2.d"),
+        hint: "No hints this time ;)".outdent.strip(),
+        type: test,
+    },
+
+    {
+        name: "if3",
+        path: buildPath("exercises", "if", "if3.d"),
+        hint: "Use the ternary operator, e.g `return a > b ? a : b;`".outdent.strip(),
+        type: test,
+    },
 ];
