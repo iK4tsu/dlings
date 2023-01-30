@@ -102,6 +102,44 @@ immutable Exercise[] exercices =
         type: compile,
     },
 
+// functions:
+    {
+        name: "functions1",
+        path: buildPath("exercises", "functions", "functions1.d"),
+        hint: "Insert `a + b` after `return`.",
+        type: compile,
+    },
+
+    {
+        name: "functions2",
+        path: buildPath("exercises", "functions", "functions2.d"),
+        hint: "Insert the parameter `float a`, e.g `float half(float a)`",
+        type: compile,
+    },
+
+    {
+        name: "functions3",
+        path: buildPath("exercises", "functions", "functions3.d"),
+        hint: "Insert the parameter `float a`, e.g `float half(float a)`",
+        type: compile,
+    },
+
+    {
+        name: "functions4",
+        path: buildPath("exercises", "functions", "functions4.d"),
+        hint: "Create another function 'add' that receives 'float' types.",
+        type: compile,
+    },
+
+    {
+        name: "functions5",
+        path: buildPath("exercises", "functions", "functions5.d"),
+        hint: "
+            Modify the function signature to work with templated types.
+            `T multiply(T)(const T left, const T right)`".outdent.strip(),
+        type: compile,
+    },
+
 // if:
     {
         name: "if1",
