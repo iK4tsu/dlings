@@ -1,3 +1,6 @@
+/// Pass the tests!
+/// Run `dlings hint variables1` or type 'hint' if in watch mode.
+
 // Just D it
 
 int max(const int a, const int b)
