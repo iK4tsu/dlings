@@ -60,6 +60,13 @@ immutable Exercise[] exercices =
     {
         name: "variables3",
         path: buildPath("exercises", "variables", "variables3.d"),
+        hint: "Add 'a = 4;' below the variable declaration.",
+        type: test,
+    },
+
+    {
+        name: "variables4",
+        path: buildPath("exercises", "variables", "variables4.d"),
         hint: "
             Variable 'a' is a constant value, so it cannot be modified. Remove
             the assignment expression line.".outdent.strip(),
