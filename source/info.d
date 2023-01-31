@@ -183,4 +183,12 @@ immutable Exercise[] exercices =
         hint: "Use the ternary operator, e.g `return a > b ? a : b;`".outdent.strip(),
         type: test,
     },
+
+// quiz
+    {
+        name: "quiz1",
+        path: buildPath("exercises", "quiz", "quiz1.d"),
+        hint: "No hints this time ;)".outdent.strip(),
+        type: test,
+    },
 ];
