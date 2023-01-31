@@ -152,26 +152,21 @@ immutable Exercise[] exercices =
         name: "if1",
         path: buildPath("exercises", "if", "if1.d"),
         hint: "
-			There are a couple of ways to complete this exercise.
-			1. ===
-			   if (<condition>)
-			   {
-			       return <identifier>;
-			   }
-			   else
-			   {
-			       return <identifier>;
-			   }
-			   ===
-			2. ===
-			   return <condition> ? <identifier> : <identifier>;
-			   ===
+            Use an 'if' statement:
+            ---
+            if (<condition>)
+            {
+                return <identifier>;
+            }
+            else
+            {
+                return <identifier>;
+            }
+            ---
 
-			- The parentheses are optional in D for the `if` statement.
-			- The second example uses what it's called a 'ternary operatior'.
-
-			Note that without parenthesis only the first statement after `if` is
-			  evaluated!".outdent.strip(),
+            Note: The parentheses are optional in D for the `if` statement.
+            Note: without parenthesis only the first statement after `if` is
+            evaluated!".outdent.strip(),
         type: test,
     },
 ];
