@@ -1,7 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"argparse": "1.2.0",
-		"fswatch": "0.6.0"
+		"argparse": "~master",
+		"fswatch": "0.6.0",
+		"toml": "2.0.1",
+		"unit-threaded": "2.0.5"
 	}
 }
