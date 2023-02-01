@@ -1,6 +1,7 @@
 import std.algorithm : dropUntil = find;
 import std.algorithm : predSwitch;
 import std.process : environment;
+import std.file : exists;
 import std.range : empty, front, takeOne;
 import std.stdio : writeln, writefln;
 import std.sumtype;
@@ -8,9 +9,10 @@ import std.typecons : No, Yes;
 
 import argparse;
 
-import info : exercices;
+import info : Exercise, exercisesFromTOML;
 import tutor : run, verify, watch;
 import ui : UI;
+import util : trustedStderr;
 
 debug import std.experimental.logger;
 
@@ -78,13 +80,28 @@ void main(string[] args)
 
 	immutable UI ui = { colored: cmdlArgs.color == Config.StylingMode.on, emojis: cmdlArgs.emoji };
 
+	if (!exists("exercises.toml"))
+	{
+		trustedStderr.writeln("file 'exercises.toml' is missing!");
+		return;
+	}
+
+	const result = "exercises.toml".exercisesFromTOML();
+	if (!result)
+	{
+		trustedStderr.writeln(result.error);
+		return;
+	}
+
+	immutable Exercise[] exercises = result.success;
+
 	cmdlArgs.cmd.match!(
 		(in Hint arg)
 		{
 			debug infof("command 'hint' with args %s", arg);
 
 			// find exercise
-			auto maybeExercise = exercices.dropUntil!(e => e.name == arg.exercise).takeOne();
+			auto maybeExercise = exercises.dropUntil!(e => e.name == arg.exercise).takeOne();
 			debug infof("exercise search result: %(%s%)", maybeExercise);
 
 			if (maybeExercise.empty)
@@ -99,7 +116,7 @@ void main(string[] args)
 		{
 			debug infof("command 'run' with args: %s", arg);
 
-			const maybeExercise = exercices.dropUntil!(e => e.name == arg.exercise).takeOne();
+			const maybeExercise = exercises.dropUntil!(e => e.name == arg.exercise).takeOne();
 			debug infof("exercise search result: %(%s%)", maybeExercise);
 
 			if (maybeExercise.empty)
@@ -113,11 +130,11 @@ void main(string[] args)
 		(in Verify _)
 		{
 			debug info("command 'verify'");
-			cast(void) verify(exercices, 0, ui);
+			cast(void) verify(exercises, 0, ui);
 		},
 		(in Watch _)
 		{
-			final switch (watch(exercices, ui))
+			final switch (watch(exercises, ui))
 			{
 				case Yes.finished:
 					writeln("We hope you enjoyed learning about the various aspects of D!");
