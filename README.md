@@ -41,7 +41,7 @@ This will build DUB dependencies and place them in your DUB local repository.
 Now that we have all needed dependencies in DUB's local repository, we can
 install `dlings`:
 ```sh
-DC=dmd meson setup <builddir>
+DC=dmd meson setup <builddir> --buildtype=release
 ninja -C <builddir> install
 dlings --help
 ```
@@ -49,7 +49,7 @@ dlings --help
 By default, Meson will use the system's install path. You can change it with `--prefix`.\
 If you want to install `dlings` to `$HOME/.local/bin/` then:
 ```sh
-DC=dmd meson --prefix="$HOME/.local/" setup <builddir>
+DC=dmd meson --prefix="$HOME/.local/" setup <builddir> --buildtype=release
 ninja -C <builddir> install
 dlings --help
 ```
