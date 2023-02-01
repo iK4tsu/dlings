@@ -1,7 +1,18 @@
 module info;
 
-import std.path : buildPath;
+import std.algorithm : map;
+import std.array : array;
+import std.conv : to;
+import std.file : exists, FileException, readText;
+import std.path : buildPath, pathSplitter;
 import std.string : outdent, strip;
+import std.utf : UTFException;
+
+import toml;
+
+import util : Result;
+
+debug import std.experimental.logger;
 
 struct Exercise
 {
@@ -13,182 +24,88 @@ struct Exercise
     Type type;
 }
 
-// TODO: use ETI - https://github.com/dlang/DIPs/blob/master/DIPs/DIP1044.md
-// syntax sugar for Exercise.Type members
-private mixin imported!"util".bindEnumMembers!(Exercise.Type);
-immutable Exercise[] exercices =
-[
-// intro:
-    {
-        name: "intro1",
-        path: buildPath("exercises", "intro", "intro1.d"),
-        hint: "Remove the 'Just D it' comment to move to the next exercise.",
-        type: compile,
-    },
+/**
+Reads TOML `filepath` and parses its contents into `Exercise`s.
 
-    {
-        name: "intro2",
-        path: buildPath("exercises", "intro", "intro2.d"),
-        hint: "
-            The format string expects something.
-            Add an argument inside the function.".outdent.strip(),
-        type: compile,
-    },
+Params:
+	filepath = '.toml' file to parse
 
-// variables:
-    {
-        name: "variables1",
-        path: buildPath("exercises", "variables", "variables1.d"),
-        hint: "
-            When declaring variables, D needs a bit more information than just
-            an identifier. Try giving 'a' aditional information about what it is
-            and what it represents. Add the type before 'a'.".outdent.strip(),
-        type: compile,
-    },
+Returns: an `immutable Exercise[]` with the parsed exercise's data.
+*/
+@safe
+Result!(immutable(Exercise[]), string) exercisesFromTOML(in string filepath)
+	in (filepath.exists)
+{
+	debug infof("parsing file '%s'", filepath);
+	alias Err = typeof(return).Err;
 
-    {
-        name: "variables2",
-        path: buildPath("exercises", "variables", "variables2.d"),
-        hint: "
-            Unlike C or C++, all variables in D have predictable values when
-            initialized. This is because, by default, all variables are
-            initialized to their default initializer value. The int.init value
-            is '0'.".outdent.strip(),
-        type: test,
-    },
+	try
+	{
+		return filepath.readText.exercisesFromTOMLImpl();
+	}
+	catch (FileException e) { return Err(e.msg); }
+	catch (UTFException e) { return Err("malformed UTF-8 file: " ~ e.msg); }
 
-    {
-        name: "variables3",
-        path: buildPath("exercises", "variables", "variables3.d"),
-        hint: "Add 'a = 4;' below the variable declaration.",
-        type: test,
-    },
+}
 
-    {
-        name: "variables4",
-        path: buildPath("exercises", "variables", "variables4.d"),
-        hint: "
-            Variable 'a' is a constant value, so it cannot be modified. Remove
-            the assignment expression line.".outdent.strip(),
-        type: compile,
-    },
+/**
+Parses 'text' contents into `Exercise`s.
 
-// floating_point
-    {
-        name: "floating_point1",
-        path: buildPath("exercises", "floating_point", "floating_point1.d"),
-        hint: "
-            Integer expressions cannot preserve the fractional part of a
-            result. Change the expected value '0.5' to '0'.".outdent.strip(),
-        type: test,
-    },
+Params:
+	text = data in toml format to parse
 
-    {
-        name: "floating_point2",
-        path: buildPath("exercises", "floating_point", "floating_point2.d"),
-        hint: "
-            The default initializer of floating point types is 'nan'. Arithmetic
-            operations with 'nan' always result in 'nan'. Initialize 'f' to any
-            numeric literal, e.g `float f = 0;`".outdent.strip(),
-        type: test,
-    },
+Returns: an `immutable Exercise[]` with the parsed exercise's data.
+*/
+@safe
+private Result!(immutable(Exercise[]), string) exercisesFromTOMLImpl(in string text)
+{
+	alias Err = typeof(return).Err;
+	alias Ok = typeof(return).Ok;
 
-    {
-        name: "floating_point3",
-        path: buildPath("exercises", "floating_point", "floating_point3.d"),
-        hint: "
-            Make use of the 'std.math' module. There you can find the 'isNan'
-            function and change the code to `assert(isNan(f));`".outdent.strip(),
-        type: compile,
-    },
+	TOMLDocument toml;
+	try
+	{
+		toml = text.parseTOML;
+	}
+	catch (TOMLParserException e) { return Err(e.msg); }
 
-    {
-        name: "floating_point4",
-        path: buildPath("exercises", "floating_point", "floating_point4.d"),
-        hint: "No hints this time ;)",
-        type: compile,
-    },
+	debug infof("caching all exercise's data.");
+	const TOMLValue[] tomlExercises = toml["exercises"].array;
 
-// functions:
-    {
-        name: "functions1",
-        path: buildPath("exercises", "functions", "functions1.d"),
-        hint: "Insert `a + b` after `return`.",
-        type: compile,
-    },
+	return Ok(tomlExercises.map!"a.table"
+		.map!(exercise => Exercise(
+			exercise["name"].str,
+			exercise["path"].str.pathSplitter.buildPath(), // ensure path is formatted correctly
+			exercise["hint"].str.strip.outdent(),
+			exercise["type"].str.to!(Exercise.Type),
+		)).array.idup);
+}
 
-    {
-        name: "functions2",
-        path: buildPath("exercises", "functions", "functions2.d"),
-        hint: "Insert the parameter `float a`, e.g `float half(float a)`",
-        type: compile,
-    },
+///
+@safe unittest
+{
+	import util : match;
+	immutable exercises = exercisesFromTOMLImpl(`
+		[[exercises]]
+		name = "foo"
+		path = "dummy/path/to/foo"
+		hint = "no hint"
+		type = "test"
 
-    {
-        name: "functions3",
-        path: buildPath("exercises", "functions", "functions3.d"),
-        hint: "Insert the parameter `float a`, e.g `float half(float a)`",
-        type: compile,
-    },
+		[[exercises]]
+		name = "bar"
+		path = "dummy/path/to/bar"
+		hint = "no hint"
+		type = "compile"
 
-    {
-        name: "functions4",
-        path: buildPath("exercises", "functions", "functions4.d"),
-        hint: "Create another function 'add' that receives 'float' types.",
-        type: compile,
-    },
+		[unrelated_table]
+		key = "value"
+	`).match!((string _) => assert(0), (exercises) => exercises);
 
-    {
-        name: "functions5",
-        path: buildPath("exercises", "functions", "functions5.d"),
-        hint: "
-            Modify the function signature to work with templated types.
-            `T multiply(T)(const T left, const T right)`".outdent.strip(),
-        type: compile,
-    },
-
-// if:
-    {
-        name: "if1",
-        path: buildPath("exercises", "if", "if1.d"),
-        hint: "
-            Use an 'if' statement:
-            ---
-            if (<condition>)
-            {
-                return <identifier>;
-            }
-            else
-            {
-                return <identifier>;
-            }
-            ---
-
-            Note: The parentheses are optional in D for the `if` statement.
-            Note: without parenthesis only the first statement after `if` is
-            evaluated!".outdent.strip(),
-        type: test,
-    },
-
-    {
-        name: "if2",
-        path: buildPath("exercises", "if", "if2.d"),
-        hint: "No hints this time ;)".outdent.strip(),
-        type: test,
-    },
-
-    {
-        name: "if3",
-        path: buildPath("exercises", "if", "if3.d"),
-        hint: "Use the ternary operator, e.g `return a > b ? a : b;`".outdent.strip(),
-        type: test,
-    },
-
-// quiz
-    {
-        name: "quiz1",
-        path: buildPath("exercises", "quiz", "quiz1.d"),
-        hint: "No hints this time ;)".outdent.strip(),
-        type: test,
-    },
-];
+	import std.algorithm : equal;
+	assert(exercises.length == 2);
+	assert(exercises.equal([
+		Exercise("foo", buildPath("dummy", "path", "to", "foo"), "no hint", Exercise.Type.test),
+		Exercise("bar", buildPath("dummy", "path", "to", "bar"), "no hint", Exercise.Type.compile),
+	]));
+}
