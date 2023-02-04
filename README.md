@@ -6,6 +6,7 @@ If the name doesn't sound strange, it's because you might have heard of [rustlin
 ## Dependencies
 * [argparse](https://code.dlang.org/packages/argparse)
 * [fswatch](https://code.dlang.org/packages/fswatch)
+* [toml](https://code.dlang.org/packages/toml)
 
 ## Clone the repository
 ```sh
