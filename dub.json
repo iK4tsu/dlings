@@ -4,7 +4,7 @@
 	],
 	"copyright": "Copyright © 2023, Joao Lourenco",
 	"dependencies": {
-		"argparse": { "version": "~>1.2.0", "dflags": [] },
+		"argparse": { "version": "~master", "dflags": [] },
 		"fswatch": { "version": "~>0.6.0", "dflags": [] }
 	},
 	"description": "Small exercises to get you used to reading and writing D code!",
