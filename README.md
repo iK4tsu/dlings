@@ -63,6 +63,8 @@ and build your DUB dependencies.
 | argument | description
 | ------- | -----------
 | --help \| -h | Prints the help menu
+| --color | Colorize the output. If value is omitted then 'always' is used.
+| --emoji | Enable emoji output. If value is omitted then 'always' is used.
 
 ## Commands
 | command | description
@@ -73,6 +75,19 @@ and build your DUB dependencies.
 | watch   | Verify in interactive mode
 
 *Note: use '--help' with a command for more information about it.*
+
+## Colors and Emojis
+By default, `dlings` will auto-detect whether or not to use colored output and
+emojis if the respective optional arguments are not used. Dlings depends on
+[argparse](https://github.com/andrey-zherikov/argparse#heuristics-for-enabling-styling)
+to detect if colors can be used. If the environment variable `NO_EMOJI` is
+defined emojis won't be used.
+
+The following sequence disables colors and emojis:
+```sh
+NO_COLOR=1 NO_EMOJI= dlings --help
+```
+
 # Status
 This project is in its early days. Currently, only exercises used for testing are
 available.
