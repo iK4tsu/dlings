@@ -1,1 +1,1 @@
-sources += files('app.d', 'info.d', 'tutor.d', 'util.d')
+sources += files('app.d', 'info.d', 'tutor.d', 'ui.d', 'util.d')
