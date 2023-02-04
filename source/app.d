@@ -1,4 +1,6 @@
 import std.algorithm : dropUntil = find;
+import std.algorithm : predSwitch;
+import std.process : environment;
 import std.range : empty, front, takeOne;
 import std.stdio : writeln, writefln;
 import std.sumtype;
@@ -8,6 +10,7 @@ import argparse;
 
 import info : exercices;
 import tutor : run, verify, watch;
+import ui : UI;
 
 debug import std.experimental.logger;
 
@@ -37,8 +40,30 @@ struct Verify
  .ShortDescription("Similiar to 'verify' but reruns each time the file is modified."))
 struct Watch {}
 
+@(NamedArgument
+ .Description("Enable emoji output. If value is omitted then 'always' is used.")
+ .AllowedValues!(["always", "auto", "never"])
+ .NumberOfValues(0, 1)
+ .Parse!((string[] params) => params[0])
+ .Action!((ref self, string param) {
+	self.emoji = param.predSwitch(
+		"always", true,
+		"auto", self.emoji,
+		"never", false);
+  })
+ .ActionNoValue!((ref self) { self.emoji = true; }))
+struct EmojiArgument { bool emoji; alias emoji this; }
+
 struct DlingsCmdlArgs
 {
+
+	@NamedArgument
+	EmojiArgument emoji;
+
+	@NamedArgument
+	auto color = ansiStylingArgument;
+
+	@SubCommands
 	SumType!(Hint, Run, Verify, Watch) cmd;
 }
 
@@ -47,9 +72,11 @@ void main(string[] args)
 	if (!args[1 .. $].length)
 		args ~= "--help";
 
-	DlingsCmdlArgs cmdlArgs;
+	DlingsCmdlArgs cmdlArgs = { emoji: { environment.get("NO_EMOJI") is null } };
 	if (!CLI!DlingsCmdlArgs.parseArgs(cmdlArgs, args[1 .. $]))
 		return;
+
+	immutable UI ui = { colored: cmdlArgs.color == Config.StylingMode.on, emojis: cmdlArgs.emoji };
 
 	cmdlArgs.cmd.match!(
 		(in Hint arg)
@@ -81,16 +108,16 @@ void main(string[] args)
 				return;
 			}
 
-			run(maybeExercise.front).output.writeln;
+			run(maybeExercise.front, ui).output.writeln;
 		},
 		(in Verify _)
 		{
 			debug info("command 'verify'");
-			cast(void) verify(exercices, 0);
+			cast(void) verify(exercices, 0, ui);
 		},
 		(in Watch _)
 		{
-			final switch (watch(exercices))
+			final switch (watch(exercices, ui))
 			{
 				case Yes.finished:
 					writeln("We hope you enjoyed learning about the various aspects of D!");

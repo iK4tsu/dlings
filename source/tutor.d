@@ -4,13 +4,14 @@ import core.atomic : atomicLoad, atomicStore;
 import core.attribute;
 import std.algorithm : dropUntil = find;
 import std.algorithm : cache, canFind, each, map;
+import std.array : join;
 import std.concurrency : spawn;
 import std.datetime.systime : SysTime;
 import std.file : isFile, readText;
 import std.format : format;
 import std.functional : bind;
 import std.process : execute;
-import std.range : drop, dropExactly, enumerate, front, repeat;
+import std.range : drop, dropExactly, chain, enumerate, front, only, repeat;
 import std.stdio : readln, write, writeln, writefln;
 import std.stdio : File, stderr, stdout;
 import std.string : endsWith, lineSplitter, strip;
@@ -19,10 +20,12 @@ import std.typecons : Nullable, Tuple, tuple;
 import std.typecons : Flag, No, Yes;
 
 import argparse;
+import argparse.ansi;
 import fswatch;
 
 import info : Exercise;
 import util : trustedStderr, trustedStdout;
+import ui : UI;
 
 debug import std.experimental.logger;
 
@@ -38,21 +41,31 @@ Params:
 
 Returns: a struct with a 'failure' bool and the 'output' string.
 */
-auto run(Flag!"interactive" interactive = No.interactive)(immutable Exercise exercise)
+auto run(Flag!"interactive" interactive = No.interactive)(immutable Exercise exercise, in UI ui)
 {
 	debug infof("running '%s' in '%s.interactive'", exercise.name, interactive);
-	alias Header = Tuple!(string, "success", string, "failure");
 
 
 	/// UI helpers
-	immutable header = [
-		Exercise.Type.compile: Header("🎉 🎉  \x1B[92mProgram compiled successfully!\x1B[0m 🎉 🎉", // green fg
-									  "\x1B[33m󰀦  \x1B[1mProgram failed to compile!\x1B[0m"), // yellow fg
-		Exercise.Type.test:    Header("🎉 🎉  \x1B[92mProgram compiled successfully and test passed!\x1B[0m 🎉 🎉", // green fg
-									  "\x1B[33m󰀦  \x1B[1mProgram failed to compile or tests did not pass!\x1B[0m"), // yellow fg
-	];
+	immutable header = ()
+	{
+		alias Header = Tuple!(string, "success", string, "failure");
 
-	immutable separator = "\x1B[36m====================\x1B[0m"; // blue fg
+		const sparkles = ui.emoji("✨", ui.style!yellow("*")).repeat(2);
+		const warning = ui.emoji("⚠️ ", ui.style!yellow("!")).only;
+		alias success = (string msg) => ui.style!green(msg).only;
+		alias failure = (string msg) => ui.style!yellow(msg).only;
+
+		// OK to cast immutable here
+		return cast(immutable) [
+			Exercise.Type.compile: Header(sparkles.chain(success("Program compiled successfully!"), sparkles).join(" "),
+										  warning.chain(failure("Program failed to compile!")).join(" ")),
+			Exercise.Type.test: Header(sparkles.chain(success("Program compiled successfully and test passed!"), sparkles).join(" "),
+									   warning.chain(failure("Program failed to compile or tests did not pass!")).join(" ")),
+		];
+	} ();
+
+	immutable separator = ui.style!blue("====================");
 
 
 	/// compiler arguments
@@ -94,9 +107,11 @@ auto run(Flag!"interactive" interactive = No.interactive)(immutable Exercise exe
 		{
 			// adds a final hint to a successful compilation
 			// if the keep working comment is present
-			immutable hint = "\n\n\x1B[33mYou can keep working on this exercise, "
-						   ~ "or jump into the next one by removing the "
-						   ~ "\x1B[1m`Just D it`\x1B[22m comment.\x1B[0m";
+			immutable hint = "\n\n"
+						   ~ ui.style!yellow("You can keep working on this exercise, "
+						   ~ "or jump into the next one by removing the ")
+						   ~ ui.style!(bold.yellow)("`Just D it` ")
+						   ~ ui.style!yellow("comment.");
 			output ~= hint;
 		}
 
@@ -121,7 +136,7 @@ Params:
 Retuns: a Nullable!size_t with the offset to the failed exercise, otherwise null
 if all exercises succeed.
 */
-Nullable!size_t verify(immutable(Exercise)[] exercises, size_t from)
+Nullable!size_t verify(immutable(Exercise)[] exercises, size_t from, in UI ui)
 {
 	debug infof("verifying exercise '%s' starting from offset '%s'", exercises[from].name, from);
 
@@ -133,11 +148,11 @@ Nullable!size_t verify(immutable(Exercise)[] exercises, size_t from)
 		/// Progress [##>---] (3/6) (50.00%)
 		/// Progress [####>-] (5/6) (100.00%)
 		/// Progress [######] (6/6) (100.00%)
-		writefln!"Progress [\x1B[32m%-(%s%)\x1B[1m%s\x1B[31m%-(%s%)\x1B[0m] (%d/%d)%s"
+		writefln!"Progress [%-(%s%)%s%-(%s%)] (%d/%d)%s"
 		(
-			'#'.repeat(completed).drop(1),
-			completed ? ">" : "",
-			"-".repeat(exercises.length - completed),
+			ui.style!green("#").repeat(completed).drop(1),
+			completed ? ui.style!(bold.green)(">") : "",
+			ui.style!(bold.red)("-").repeat(exercises.length - completed),
 			completed, exercises.length,
 			completed ? format!" (%.2f%%)"(completed * 100f / exercises.length) : ""
 		);
@@ -146,14 +161,15 @@ Nullable!size_t verify(immutable(Exercise)[] exercises, size_t from)
 	auto failedExercises = exercises
 		.enumerate
 		.dropExactly(from)
-		.map!(bind!((i, exercise) => tuple!("index", "value")(i, exercise.run!(Yes.interactive))))
+		.map!(bind!((i, exercise) => tuple!("index", "value")(i, exercise.run!(Yes.interactive)(ui))))
 		.cache
 		.dropUntil!("a.value.failure");
 
 	if (!failedExercises.length)
 	{
 		displayBar(exercises.length);
-		writeln("🎉 🎉  \x1B[92mCongrats! No more exercises left to do!\x1B[0m 🎉 🎉");
+		const party = ui.emoji("🎉 ", ui.style!yellow("o")).repeat(2);
+		writeln(party.chain(ui.style!lightGreen("Congrats! No more exercises left to do!").only, party).join(" "));
 		return Nullable!size_t.init;
 	}
 	else
@@ -196,11 +212,11 @@ Params:
 Returns: Yes.finished if all exercises were completed, otherwise No.finished if
 exiting without completing all exercises.
 */
-Flag!"finished" watch(immutable(Exercise)[] exercises)
+Flag!"finished" watch(immutable(Exercise)[] exercises, in UI ui)
 	in (exercises.length)
 {
 	// run verify
-	Nullable!size_t failedIndex = verify(exercises, 0);
+	Nullable!size_t failedIndex = verify(exercises, 0, ui);
 	if (failedIndex.isNull) return Yes.finished; // all exercises succeeded!
 
 	// prepare shared data
@@ -221,7 +237,7 @@ Flag!"finished" watch(immutable(Exercise)[] exercises)
 
 			debug infof("file '%s' modified!", exercises[failedIndex.get].path);
 
-			failedIndex = verify(exercises, failedIndex.get);
+			failedIndex = verify(exercises, failedIndex.get, ui);
 			if (failedIndex.isNull) return Yes.finished; // all exercises completed!
 
 			synchronized { exerciseHint = exercises[failedIndex.get].hint; }
