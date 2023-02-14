@@ -12,6 +12,6 @@ import std.stdio;
 
 void main()
 {
-	writefln!"int.max + 1"(int.max + 1); // overflows to int.min
-	writefln!"float.max + 1"(float.max + 1); // infinity
+	writefln!"int.max + 1 = %s"(int.max + 1); // overflows to int.min
+	writefln!"float.max * 1.1 = %s"(float.max * 1.1f); // overflows to infinity
 }
